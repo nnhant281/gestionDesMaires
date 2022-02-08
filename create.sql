@@ -1,0 +1,341 @@
+SPOOL scriptscreate.log
+
+PROMPT >> lancer le sqlplus
+sqlplus /nolog 
+
+PROMPT >> Se connecter au system
+
+connect SYSTEM/Pise2020*
+
+PROMPT >>Création de tablespace
+create tablespace DATA_PISE_NGUYENLE
+    DATAFILE
+        'C:\App\Oracle\oradata\PISE\DATAFILE\DATA_PISE_NGUYENLE1.dbf' Size 1024 m,
+        'C:\App\Oracle\oradata\PISE\DATAFILE\DATA_PISE_NGUYENLE2.dbf' Size 1024 m
+        Segment space management auto;
+        
+create tablespace INDEX_PISE_NGUYENLE
+    DATAFILE
+        'C:\App\Oracle\oradata\PISE\DATAFILE\INDEX_PISE_NGUYENLE1.dbf' Size 512 m,
+        'C:\App\Oracle\oradata\PISE\DATAFILE\INDEX_PISE_NGUYENLE2.dbf' Size 512 m
+    Segment space management auto;
+
+PROMPT >>Création schéma et droits nécessaires 
+
+create user BaoNhan identified by Paris2020;
+grant connect to BaoNhan;
+grant create table to BaoNhan ;
+grant create view to BaoNhan;
+grant create any index to BaoNhan;
+grant create synonym to BaoNhan;
+grant create sequence to BaoNhan;
+
+
+PROMPT >>DONNER LE DROIT SUR TABLESPACE
+
+Alter user BaoNhan quota unlimited on DATA_PISE_NGUYENLE;
+Alter user BaoNhan quota unlimited on INDEX_PISE_NGUYENLE;
+ALTER USER BaoNhan DEFAULT TABLESPACE DATA_PISE_NGUYENLE ;
+
+PROMPT >>SE DECONNECTER DU COMPTE SYSTEM ET SE CONNECTER AU SCHEMA BaoNhan
+
+disconnect;
+
+connect BaoNhan/Paris2020;
+
+PROMPT >> Création des tables
+
+Create table REGION
+(
+	NOM_REGION VARCHAR(100)								,
+	CHEF_LIEU_REGION VARCHAR(100) NOT NULL				,
+	NOM_PRENOM_PRESIDENT VARCHAR(100) NOT NULL			,
+	NOMBRE_VILLE NUMBER NOT NULL
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table VILLE
+(
+	NOM_VILLE VARCHAR(100)							,
+	SUPERFICIE_VILLE VARCHAR(100) NOT NULL			,
+	NOM_PRENOM_MAIRE VARCHAR (100) NOT NULL			,
+	NOMBRE_HABITANT  NUMBER   NOT NULL				,
+	NOMBRE_ARRONDISSEMENT NUMBER NOT NULL			,
+	TELEPHONE VARCHAR(10) NOT NULL					,
+	FAX VARCHAR(20)									,
+	EMAIL VARCHAR(100)								,
+	SITE_INTERNET VARCHAR(100)						,
+	NOM_PRENOM_RESPONSABLE_ADMINISTRATIF VARCHAR(100) NOT NULL,
+	NOM_RUE_MAIRIE VARCHAR(100)	NOT NULL			,
+	NUMERO_ADRESSE_MAIRIE NUMBER NOT NULL			,
+	CODE_POSTALE_MAIRIE VARCHAR (5)	NOT NULL		,
+	BP_MAIRIE NUMBER								,
+	NUMERO_DEPARTEMENT VARCHAR(3)
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table DEPARTEMENT
+(
+	NUMERO_DEPARTEMENT VARCHAR (3)			,
+	NOM_DEPARTEMENT VARCHAR (100)	NOT NULL,
+	NOM_REGION VARCHAR(100)		
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table ARRONDISSEMENT
+(
+	NOM_ARRONDISSEMENT VARCHAR(100)							,
+	NOM_PRENOM_MAIRE VARCHAR(100)	NOT NULL				,
+	TELEPHONE VARCHAR(10) NOT NULL							,
+	FAX VARCHAR(20)											,
+	EMAIL VARCHAR(100)										,
+	SITE_INTERNET VARCHAR(100)								,
+	NOM_PRENOM_RESPONSABLE_ADMINISTRATIF VARCHAR(100)		,
+	NOM_RUE_MAIRIE VARCHAR(100)	NOT NULL					,
+	NUMERO_ADRESSE_MAIRIE NUMBER NOT NULL					,
+	CODE_POSTALE_MAIRIE VARCHAR (5)	NOT NULL				,
+	BP_MAIRIE NUMBER										,
+	NOM_VILLE VARCHAR(100)
+) Tablespace DATA_PISE_NGUYENLE;
+
+
+Create table CITOYEN
+(
+	IDENTIFIANT VARCHAR(100)				,
+	NOM_PRINCIPAL VARCHAR(50) NOT NULL		,
+	NOM_SECONDAIRE VARCHAR(50)				,
+	PRENOM_PRINCIPAL VARCHAR(100) NOT NULL	,
+	PRENOM_SECONDAIRES VARCHAR(50) 			,
+	DATE_NAISSANCE DATE NOT NULL			,
+	SEXE VARCHAR(10) NOT NULL				,
+	PAYS_NAISSANCE VARCHAR(100)	NOT NULL	,
+	NATIONALITE VARCHAR(100) NOT NULL		,
+	TELEPHONE_FIX VARCHAR(10)				,
+	TELEPHONE_MOBILE VARCHAR(10)			,
+	EMAIL VARCHAR(100)						,										
+	PROFESSION VARCHAR(100)					,
+	EST_MORT   VARCHAR(3)	NOT NULL		,
+	DATE_HEURE_DECES DATE 					,
+	MOTIF_DECES VARCHAR(100)				,
+	LIEU_DECES VARCHAR(100)					,
+	NOM_ARRONDISSEMENT VARCHAR(100)			,
+	VILLE_NAISSANCE VARCHAR(100)			,
+	IDENTIFIANT_ADRESSE NUMBER				,
+	LIBELLE_POSTE VARCHAR(100)				,
+	MAIRIE_VILLE_TRAVAILLE VARCHAR(100)		,
+	MAIRIE_ARRONDISSEMENT_TRAVAILLE VARCHAR(100),
+	NUM_CERTIFICAT NUMBER
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table PROFILE
+(
+	LIBELLE_PROFILE VARCHAR(100)			,
+	DUREE_MOT_DE_PASSE VARCHAR(50) NOT NULL	
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table UTILISATEUR
+(
+	LOGIN VARCHAR(100)						,
+	MOT_DE_PASSE VARCHAR(100) NOT NULL		,
+	NOM VARCHAR(50)	NOT NULL				,
+	PRENOM VARCHAR(100)	NOT NULL			,
+	FONCTION VARCHAR(100) NOT NULL			,
+	DATE_CREATION DATE 	NOT NULL			,
+	PROCHAINE_DATE_MDP_EPIRE DATE 		 	,
+	LIBELLE_PROFILE VARCHAR(100) NOT NULL	,
+	NOM_ARRONDISSEMENT VARCHAR(100)			,	
+	NOM_VILLE VARCHAR(100)			
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table MARIAGE
+(
+	NUM_CERTIFICAT NUMBER					,
+	DATE_MARIAGE DATE 	NOT NULL			,
+	NOM_VILLE VARCHAR(100)			
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table PARENTE
+(
+	ID_PARENT VARCHAR(100)			,
+	ID_ENFANT VARCHAR(100) NOT NULL
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table POSTE_TETE_MAISON_COMMUNE
+(
+	LIBELLE_POSTE VARCHAR(100)
+) Tablespace DATA_PISE_NGUYENLE;
+
+Create table ADRESSE
+(
+	IDENTIFIANT_ADRESSE NUMBER							,
+	NOM_RUE VARCHAR(100) NOT NULL						,
+	NUMERO NUMBER NOT NULL								,
+	CODE_POSTALE VARCHAR(5)	NOT NULL					,	
+	BP NUMBER											,
+	NOM_VILLE VARCHAR(100)							
+) Tablespace DATA_PISE_NGUYENLE;
+
+
+PROMPT >> CREATION CLES PRIMAIRES
+
+Alter table REGION
+Add constraint REGION_PK
+Primary key (NOM_REGION)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table DEPARTEMENT
+Add constraint DEPARTEMENT_PK
+Primary key (NUMERO_DEPARTEMENT)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table VILLE
+Add constraint VILLE_PK
+Primary key (NOM_VILLE)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table ARRONDISSEMENT
+Add constraint ARRONDISSEMENT_PK
+Primary key (NOM_ARRONDISSEMENT)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table CITOYEN
+Add constraint CITOYEN_PK
+Primary key (IDENTIFIANT)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table PROFILE
+Add constraint PROFILE_PK
+Primary key (LIBELLE_PROFILE)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table UTILISATEUR
+Add constraint UTILISATEUR_PK
+Primary key (LOGIN)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table MARIAGE
+Add constraint MARIAGE_PK
+Primary key (NUM_CERTIFICAT)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table PARENTE
+Add constraint PARENTE_PK
+Primary key (ID_PARENT, ID_ENFANT)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table POSTE_TETE_MAISON_COMMUNE
+Add constraint POSTE_PK
+Primary key (LIBELLE_POSTE)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+Alter table ADRESSE
+Add constraint ADRESSE_PK
+Primary key (IDENTIFIANT_ADRESSE)
+Using index tablespace INDEX_PISE_NGUYENLE;
+
+
+PROMPT >> CREATION DE CLES ETRANGERES
+
+Alter table DEPARTEMENT
+Add constraint DEPARTEMENT_FK
+Foreign Key (NOM_REGION)
+References REGION (NOM_REGION);
+
+Alter table VILLE
+Add constraint VILLE_FK
+Foreign Key (NUMERO_DEPARTEMENT)
+References DEPARTEMENT (NUMERO_DEPARTEMENT);
+
+Alter table ARRONDISSEMENT
+Add constraint ARRONDISSEMENT_FK
+Foreign Key (NOM_VILLE)
+References VILLE (NOM_VILLE);
+
+Alter table CITOYEN
+Add constraint CITOYEN_FK1
+Foreign Key (NOM_ARRONDISSEMENT)
+References ARRONDISSEMENT (NOM_ARRONDISSEMENT);
+
+Alter table CITOYEN
+Add constraint CITOYEN_FK2
+Foreign Key (VILLE_NAISSANCE)
+References VILLE (NOM_VILLE);
+
+Alter table CITOYEN
+Add constraint CITOYEN_FK3
+Foreign Key (IDENTIFIANT_ADRESSE)
+References ADRESSE (IDENTIFIANT_ADRESSE);
+
+Alter table CITOYEN
+Add constraint CITOYEN_FK4
+Foreign Key (LIBELLE_POSTE)
+References POSTE_TETE_MAISON_COMMUNE (LIBELLE_POSTE);
+
+Alter table CITOYEN
+Add constraint CITOYEN_FK5
+Foreign Key (NUM_CERTIFICAT)
+References MARIAGE (NUM_CERTIFICAT);
+
+Alter table CITOYEN
+Add constraint CITOYEN_FK6
+Foreign Key (LIEU_DECES)
+References VILLE (NOM_VILLE);
+
+Alter table CITOYEN
+Add constraint CITOYEN_FK7
+Foreign Key (MAIRIE_VILLE_TRAVAILLE)
+References VILLE (NOM_VILLE);
+
+Alter table CITOYEN
+Add constraint CITOYEN_FK8
+Foreign Key (MAIRIE_ARRONDISSEMENT_TRAVAILLE)
+References ARRONDISSEMENT (NOM_ARRONDISSEMENT);
+
+Alter table UTILISATEUR
+Add constraint UTILISATEUR_FK1
+Foreign Key (LIBELLE_PROFILE)
+References PROFILE (LIBELLE_PROFILE);
+
+Alter table UTILISATEUR
+Add constraint UTILISATEUR_FK2
+Foreign Key (NOM_ARRONDISSEMENT)
+References ARRONDISSEMENT (NOM_ARRONDISSEMENT);
+
+Alter table UTILISATEUR
+Add constraint UTILISATEUR_FK3
+Foreign Key (NOM_VILLE)
+References VILLE (NOM_VILLE);
+
+Alter table MARIAGE
+Add constraint MARIAGE_FK
+Foreign Key (NOM_VILLE)
+References VILLE (NOM_VILLE);
+
+Alter table PARENTE
+Add constraint PARENTE_FK1
+Foreign Key (ID_PARENT)
+References CITOYEN (IDENTIFIANT);
+
+Alter table PARENTE
+Add constraint PARENTE_FK2
+Foreign Key (ID_ENFANT)
+References CITOYEN (IDENTIFIANT);
+
+Alter table ADRESSE
+Add constraint ADRESSE_FK
+Foreign Key (NOM_VILLE)
+References VILLE (NOM_VILLE);
+
+PROMPT >> CREATION DES SEQUENCES
+
+Create sequence S_ADRESSE start with 1 increment by 1 minvalue 1 maxvalue 999999999;
+
+Create sequence S_MARIAGE start with 1 increment by 1 minvalue 1 maxvalue 999999999;
+
+
+SPOOL off
+
+
+
+
+
+
+
+
